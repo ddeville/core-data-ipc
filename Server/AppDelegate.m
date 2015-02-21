@@ -138,9 +138,11 @@
 - (void)_acceptClientConnection:(NSXPCConnection *)connection
 {
 	connection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(LLServer)];
+	[connection.exportedInterface setClasses:[NSSet setWithArray:@[[LLPersistentStoreNotification class]]] forSelector:@selector(persistentStoreUpdated:) argumentIndex:0 ofReply:NO];
 	connection.exportedObject = self;
 	
 	connection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(LLClient)];
+	[connection.remoteObjectInterface setClasses:[NSSet setWithArray:@[[LLPersistentStoreNotification class]]] forSelector:@selector(persistentStoreUpdated:) argumentIndex:0 ofReply:NO];
 	id <LLClient> client = connection.remoteObjectProxy;
 	
 	[self.clients addObject:client];

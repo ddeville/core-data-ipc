@@ -87,9 +87,11 @@
 	self.connection = connection;
 	
 	connection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(LLClient)];
+	[connection.exportedInterface setClasses:[NSSet setWithArray:@[[LLPersistentStoreNotification class]]] forSelector:@selector(persistentStoreUpdated:) argumentIndex:0 ofReply:NO];
 	connection.exportedObject = self;
 	
 	connection.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(LLServer)];
+	[connection.remoteObjectInterface setClasses:[NSSet setWithArray:@[[LLPersistentStoreNotification class]]] forSelector:@selector(persistentStoreUpdated:) argumentIndex:0 ofReply:NO];
 	self.server = [connection remoteObjectProxyWithErrorHandler:^ (NSError *error) {
 		self.server = nil;
 	}];

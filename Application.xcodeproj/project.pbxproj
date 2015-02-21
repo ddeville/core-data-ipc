@@ -200,6 +200,7 @@
 			children = (
 				6D581F631A98002600A14B57 /* Shared.h */,
 				6D581F7E1A98004600A14B57 /* Shared.m */,
+				6D7444961A98F87B00764CE6 /* Persistent Store Notification */,
 				6D581FC51A9809F600A14B57 /* Data */,
 				6D581FC41A9809F100A14B57 /* Connection */,
 				6D581FC31A9809E500A14B57 /* Constants */,
@@ -229,8 +230,6 @@
 			isa = PBXGroup;
 			children = (
 				6D581F891A9801D800A14B57 /* LLConnection.h */,
-				6D7444611A98F0C800764CE6 /* LLPersistentStoreNotification.h */,
-				6D7444621A98F0C800764CE6 /* LLPersistentStoreNotification.m */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -245,6 +244,15 @@
 				6D581FBC1A9806FB00A14B57 /* LLPerson.m */,
 			);
 			name = Data;
+			sourceTree = "<group>";
+		};
+		6D7444961A98F87B00764CE6 /* Persistent Store Notification */ = {
+			isa = PBXGroup;
+			children = (
+				6D7444611A98F0C800764CE6 /* LLPersistentStoreNotification.h */,
+				6D7444621A98F0C800764CE6 /* LLPersistentStoreNotification.m */,
+			);
+			name = "Persistent Store Notification";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -553,7 +561,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Application.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Server/Server.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Server/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -565,7 +573,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Application.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Server/Server.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Server/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -577,7 +585,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Application.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Client/Client.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -593,7 +601,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Application.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Client/Client.entitlements;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Client/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
