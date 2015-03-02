@@ -58,15 +58,14 @@ static NSString * const LLPersistentStoreNotificationSenderProcessIdentifierKey 
 {
 	NSParameterAssert([notification.name isEqualToString:NSManagedObjectContextDidSaveNotification]);
 	
-	NSDictionary *userInfo = notification.userInfo;
-	if (userInfo == nil) {
+	if (notification.userInfo == nil) {
 		return nil;
 	}
 	
-	NSMutableDictionary *notificationUserInfo = [NSMutableDictionary dictionaryWithCapacity:[userInfo count]];
+	NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:notification.userInfo.count];
 	
-	[userInfo enumerateKeysAndObjectsUsingBlock:^ (id key, NSSet *managedObjects, BOOL *stopUserInfo) {
-		if ([managedObjects count] == 0) {
+	[notification.userInfo enumerateKeysAndObjectsUsingBlock:^ (id key, NSSet *managedObjects, BOOL *stop) {
+		if (managedObjects.count == 0) {
 			return;
 		}
 		
@@ -76,17 +75,17 @@ static NSString * const LLPersistentStoreNotificationSenderProcessIdentifierKey 
 		
 		NSMutableSet *managedObjectURIRepresentations = [NSMutableSet setWithCapacity:[managedObjects count]];
 		
-		[managedObjects enumerateObjectsUsingBlock:^ (NSManagedObject *managedObject, BOOL *stop) {
-			[managedObjectURIRepresentations addObject:[[managedObject objectID] URIRepresentation]];
-		}];
+		for (NSManagedObject *managedObject in managedObjects) {
+			[managedObjectURIRepresentations addObject:[managedObject.objectID URIRepresentation]];
+		}
 		
-		[notificationUserInfo setObject:managedObjectURIRepresentations forKey:key];
+		[userInfo setObject:managedObjectURIRepresentations forKey:key];
 	}];
 	
 	LLPersistentStoreNotification *persistentStoreNotification = [[LLPersistentStoreNotification alloc] init];
-	persistentStoreNotification.userInfo = notificationUserInfo;
+	persistentStoreNotification.userInfo = userInfo;
 	persistentStoreNotification.persistentStoreIdentifier = persistentStoreIdentifier;
-	persistentStoreNotification.senderProcessIdentifier = [[NSProcessInfo processInfo] processIdentifier];
+	persistentStoreNotification.senderProcessIdentifier = [NSProcessInfo processInfo].processIdentifier;
 	
 	return persistentStoreNotification;
 }
@@ -101,21 +100,20 @@ static NSString * const LLPersistentStoreNotificationSenderProcessIdentifierKey 
 
 - (NSNotification *)_createChangeNotificationFromPersistentStoreNotification:(LLPersistentStoreNotification *)persistentStoreNotification
 {
-	NSDictionary *userInfo = persistentStoreNotification.userInfo;
-	if (userInfo == nil) {
+	if (persistentStoreNotification.userInfo == nil) {
 		return nil;
 	}
 	
-	NSMutableDictionary *notificationUserInfo = [NSMutableDictionary dictionaryWithCapacity:userInfo.count];
+	NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity:persistentStoreNotification.userInfo.count];
 	
-	[userInfo enumerateKeysAndObjectsUsingBlock:^ (id key, NSSet *managedObjectURIRepresentations, BOOL *stopUserInfo) {
+	[persistentStoreNotification.userInfo enumerateKeysAndObjectsUsingBlock:^ (id key, NSSet *managedObjectURIRepresentations, BOOL *stop) {
 		if (managedObjectURIRepresentations.count == 0) {
 			return;
 		}
 		
 		NSMutableSet *managedObjects = [NSMutableSet setWithCapacity:managedObjectURIRepresentations.count];
 		
-		[managedObjectURIRepresentations enumerateObjectsUsingBlock:^ (NSURL *managedObjectURIRepresentation, BOOL *stop) {
+		for (NSURL *managedObjectURIRepresentation in managedObjectURIRepresentations) {
 			NSManagedObject *managedObject = [self _fetchCleanManagedObjectForURI:managedObjectURIRepresentation];
 			if (managedObject == nil) {
 				managedObject = [self _managedObjectForURI:managedObjectURIRepresentation];
@@ -126,12 +124,12 @@ static NSString * const LLPersistentStoreNotificationSenderProcessIdentifierKey 
 			}
 			
 			[managedObjects addObject:managedObject];
-		}];
+		};
 		
-		[notificationUserInfo setObject:managedObjects forKey:key];
+		[userInfo setObject:managedObjects forKey:key];
 	}];
 	
-	return [NSNotification notificationWithName:NSManagedObjectContextDidSaveNotification object:nil userInfo:notificationUserInfo];
+	return [NSNotification notificationWithName:NSManagedObjectContextDidSaveNotification object:nil userInfo:userInfo];
 }
 
 - (NSManagedObject *)_fetchCleanManagedObjectForURI:(NSURL *)URIRepresentation
@@ -142,10 +140,10 @@ static NSString * const LLPersistentStoreNotificationSenderProcessIdentifierKey 
 	}
 	
 	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	[fetchRequest setEntity:[managedObject entity]];
+	fetchRequest.entity = managedObject.entity;
 	
 	NSPredicate *predicate = [NSComparisonPredicate predicateWithLeftExpression:[NSExpression expressionForEvaluatedObject] rightExpression:[NSExpression expressionForConstantValue:managedObject] modifier:NSDirectPredicateModifier type:NSEqualToPredicateOperatorType options:(NSComparisonPredicateOptions)0];
-	[fetchRequest setPredicate:predicate];
+	fetchRequest.predicate = predicate;
 	
 	return [(id)[self executeFetchRequest:fetchRequest error:nil] firstObject];
 }
