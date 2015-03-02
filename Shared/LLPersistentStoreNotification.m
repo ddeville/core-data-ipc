@@ -58,7 +58,7 @@ static NSString * const LLPersistentStoreNotificationSenderProcessIdentifierKey 
 {
 	NSParameterAssert([notification.name isEqualToString:NSManagedObjectContextDidSaveNotification]);
 	
-	if (notification.userInfo == nil) {
+	if (!notification.userInfo) {
 		return nil;
 	}
 	
@@ -100,7 +100,7 @@ static NSString * const LLPersistentStoreNotificationSenderProcessIdentifierKey 
 
 - (NSNotification *)_createChangeNotificationFromPersistentStoreNotification:(LLPersistentStoreNotification *)persistentStoreNotification
 {
-	if (persistentStoreNotification.userInfo == nil) {
+	if (!persistentStoreNotification.userInfo) {
 		return nil;
 	}
 	
@@ -114,48 +114,16 @@ static NSString * const LLPersistentStoreNotificationSenderProcessIdentifierKey 
 		NSMutableSet *managedObjects = [NSMutableSet setWithCapacity:managedObjectURIRepresentations.count];
 		
 		for (NSURL *managedObjectURIRepresentation in managedObjectURIRepresentations) {
-			NSManagedObject *managedObject = [self _fetchCleanManagedObjectForURI:managedObjectURIRepresentation];
-			if (managedObject == nil) {
-				managedObject = [self _managedObjectForURI:managedObjectURIRepresentation];
+			NSManagedObjectID *managedObjectID = [self.persistentStoreCoordinator managedObjectIDForURIRepresentation:managedObjectURIRepresentation];
+			if (managedObjectID) {
+				[managedObjects addObject:[self objectWithID:managedObjectID]];
 			}
-			
-			if (managedObject == nil) {
-				return;
-			}
-			
-			[managedObjects addObject:managedObject];
 		};
 		
 		[userInfo setObject:managedObjects forKey:key];
 	}];
 	
 	return [NSNotification notificationWithName:NSManagedObjectContextDidSaveNotification object:nil userInfo:userInfo];
-}
-
-- (NSManagedObject *)_fetchCleanManagedObjectForURI:(NSURL *)URIRepresentation
-{
-	NSManagedObject *managedObject = [self _managedObjectForURI:URIRepresentation];
-	if (managedObject == nil) {
-		return nil;
-	}
-	
-	NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
-	fetchRequest.entity = managedObject.entity;
-	
-	NSPredicate *predicate = [NSComparisonPredicate predicateWithLeftExpression:[NSExpression expressionForEvaluatedObject] rightExpression:[NSExpression expressionForConstantValue:managedObject] modifier:NSDirectPredicateModifier type:NSEqualToPredicateOperatorType options:(NSComparisonPredicateOptions)0];
-	fetchRequest.predicate = predicate;
-	
-	return [(id)[self executeFetchRequest:fetchRequest error:nil] firstObject];
-}
-
-- (NSManagedObject *)_managedObjectForURI:(NSURL *)URIRepresentation
-{
-	NSManagedObjectID *managedObjectID = [self.persistentStoreCoordinator managedObjectIDForURIRepresentation:URIRepresentation];
-	if (managedObjectID == nil) {
-		return nil;
-	}
-	
-	return [self objectWithID:managedObjectID];
 }
 
 @end
